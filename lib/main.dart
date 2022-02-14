@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -49,20 +51,19 @@ class _MyHomePageState extends State<MyHomePage> {
             _controller = webViewController;
             _loadHtmlFromAssets();
           },
-            javascriptChannels: <JavascriptChannel>{
-              JavascriptChannel(
-                name: 'show_flutter_toast',
-                onMessageReceived: (JavascriptMessage message) {
-                  try {
-                    debugPrint(
-                        "${message.toString()},  ${message.hashCode}, message: ${message.message}");
-                  } catch (e) {
-                    debugPrint('error>>>>${e.toString()}');
-                  }
-                },
-              )
-
-            },
+          javascriptChannels: <JavascriptChannel>{
+            JavascriptChannel(
+              name: 'show_flutter_toast',
+              onMessageReceived: (JavascriptMessage message) {
+                try {
+                  debugPrint(
+                      "${message.toString()},  ${message.hashCode}, message: ${message.message}");
+                } catch (e) {
+                  debugPrint('error>>>>${e.toString()}');
+                }
+              },
+            )
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -77,41 +78,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // 拷贝demo到沙盒
   Future<void> copyDemoToSandBox() async {
-    Directory tempDir = await getTemporaryDirectory();
-    String tempPath = tempDir.path;
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocPath = appDocDir.path;
-    _htmlFile.then((value) {
-      value.writeAsString("""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>菜鸟教程(runoob.com)</title>
-    <link rel="stylesheet" type="text/css" href="mystyle.css">
-    <script type="text/javascript" src="index1.js"></script>
+    // 获取cache目录，
+    Directory documents = await getApplicationDocumentsDirectory();
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
 
-</head>
+    /// 这里自己过滤需要复制的文件夹
+    manifestMap.keys
+        .where((key) =>
+            key.endsWith(".js") ||
+            key.endsWith(".html") ||
+            key.endsWith(".css"))
+        .forEach((element) async {
+      // 读取数据
+      ByteData data = await rootBundle.load("assets/${element}");
+      List<int> bytes =
+          data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
-<body>
-<h1>这是一个标题</h1>
-<p id="p1">这是一个段落。111</p>
-<h1 id="id01">旧标题</h1>
-<button onclick = "hello()">点击我弹出hello</button>
-</body>
-
-</html>""");
-    });
-    _cssFile.then((value) {
-      value.writeAsString("""h1 {color:red;}
-p {color:blue;}""");
-    });
-    _jsFile.then((value) {
-      value.writeAsString("""function hello(){
-    var element = document.getElementById("id01");
-    element.innerHTML = "新标题";
-
-    show_flutter_toast.postMessage("message from JS...");
-}""");
+      String dataPath = "${documents.path}/${element}";
+      File file = File(dataPath);
+      await file.create(recursive: true);
+      await File(dataPath).writeAsBytes(bytes);
+      print("复制成功");
     });
   }
 
@@ -130,6 +118,7 @@ p {color:blue;}""");
     final path = await _localPath;
     return File('$path/mystyle.css');
   }
+
   Future<File> get _jsFile async {
     final path = await _localPath;
     return File('$path/index1.js');
@@ -138,7 +127,7 @@ p {color:blue;}""");
   void _loadHtmlFromAssets() async {
     File file = await _htmlFile;
 
-    _controller?.loadUrl(Uri.file(file.path).toString());
-    // _controller?.loadFile(file.path);
+    // _controller?.loadUrl(Uri.file(file.path).toString());
+    _controller?.loadFile(file.path);
   }
 }
