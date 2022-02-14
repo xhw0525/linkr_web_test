@@ -35,7 +35,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   WebViewController? _controller;
-  File? htmlfile;
 
   @override
   Widget build(BuildContext context) {
@@ -91,15 +90,15 @@ class _MyHomePageState extends State<MyHomePage> {
             key.endsWith(".css"))
         .forEach((element) async {
       // 读取数据
-      ByteData data = await rootBundle.load("assets/${element}");
+      ByteData data = await rootBundle.load("assets/$element");
       List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
-      String dataPath = "${documents.path}/${element}";
+      String dataPath = "${documents.path}/$element";
       File file = File(dataPath);
       await file.create(recursive: true);
       await File(dataPath).writeAsBytes(bytes);
-      print("复制成功");
+      debugPrint("复制成功");
     });
   }
 
@@ -112,16 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<File> get _htmlFile async {
     final path = await _localPath;
     return File('$path/index.html');
-  }
-
-  Future<File> get _cssFile async {
-    final path = await _localPath;
-    return File('$path/mystyle.css');
-  }
-
-  Future<File> get _jsFile async {
-    final path = await _localPath;
-    return File('$path/index1.js');
   }
 
   void _loadHtmlFromAssets() async {
