@@ -44,10 +44,25 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: WebView(
           initialUrl: 'about:blank',
+          javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (WebViewController webViewController) {
             _controller = webViewController;
             _loadHtmlFromAssets();
           },
+            javascriptChannels: <JavascriptChannel>{
+              JavascriptChannel(
+                name: 'show_flutter_toast',
+                onMessageReceived: (JavascriptMessage message) {
+                  try {
+                    debugPrint(
+                        "${message.toString()},  ${message.hashCode}, message: ${message.message}");
+                  } catch (e) {
+                    debugPrint('error>>>>${e.toString()}');
+                  }
+                },
+              )
+
+            },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -73,11 +88,15 @@ class _MyHomePageState extends State<MyHomePage> {
     <meta charset="utf-8">
     <title>菜鸟教程(runoob.com)</title>
     <link rel="stylesheet" type="text/css" href="mystyle.css">
+    <script type="text/javascript" src="index1.js"></script>
+
 </head>
 
 <body>
 <h1>这是一个标题</h1>
-<p>这是一个段落。111</p>
+<p id="p1">这是一个段落。111</p>
+<h1 id="id01">旧标题</h1>
+<button onclick = "hello()">点击我弹出hello</button>
 </body>
 
 </html>""");
@@ -85,6 +104,14 @@ class _MyHomePageState extends State<MyHomePage> {
     _cssFile.then((value) {
       value.writeAsString("""h1 {color:red;}
 p {color:blue;}""");
+    });
+    _jsFile.then((value) {
+      value.writeAsString("""function hello(){
+    var element = document.getElementById("id01");
+    element.innerHTML = "新标题";
+
+    show_flutter_toast.postMessage("message from JS...");
+}""");
     });
   }
 
@@ -103,11 +130,15 @@ p {color:blue;}""");
     final path = await _localPath;
     return File('$path/mystyle.css');
   }
+  Future<File> get _jsFile async {
+    final path = await _localPath;
+    return File('$path/index1.js');
+  }
 
   void _loadHtmlFromAssets() async {
     File file = await _htmlFile;
 
-    // _controller?.loadUrl(Uri.file(file.path).toString());
-    _controller?.loadFile(file.path);
+    _controller?.loadUrl(Uri.file(file.path).toString());
+    // _controller?.loadFile(file.path);
   }
 }
