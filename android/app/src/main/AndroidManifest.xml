@@ -3,7 +3,7 @@
    <application
         android:label="linkr_web_test"
         android:name="${applicationName}"
-
+        android:networkSecurityConfig="@xml/network_security_config"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
