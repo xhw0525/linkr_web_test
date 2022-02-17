@@ -3,10 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jaguar_flutter_asset/jaguar_flutter_asset.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:jaguar/jaguar.dart';
+
+import 'myroute.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,50 +50,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // await _serverBind();
     final server = Jaguar(address: "127.0.0.1", port: 8000);
-    server.addRoute(serveFlutterAssets());
+    server.addRoute(serveFlutterAssets1());
     await server.serve(logRequests: true);
-
   }
 
-  Future<void> _serverBind() async {
-    HttpServer.bind(InternetAddress.anyIPv4, 8000).then((server) {
-      print("00000");
-      server.listen((HttpRequest httpRequest) async {
-        // print("11111111");
-        // request.response.write('Hello, world! 23456');
-        // request.response.close();
-
-        List<int> body = [];
-        String path = httpRequest.requestedUri.path;
-        path = (path.startsWith('/')) ? path.substring(1) : path;
-        path += (path.endsWith('/')) ? 'index.html' : '';
-        final localPath = await _localPath;
-        File file =  File('$localPath/$path');
-        try {
-          body = file.readAsBytesSync();
-        } catch (e) {
-        print('Error: $e');
-        httpRequest.response.write("$e");
-        httpRequest.response.close();
-        return;
-        }
-        var contentType = ['text', 'html'];
-        if (!httpRequest.requestedUri.path.endsWith('/') &&
-        httpRequest.requestedUri.pathSegments.isNotEmpty) {
-        // String? mimeType = lookupMimeType(httpRequest.requestedUri.path,
-        // headerBytes: body);
-        // if (mimeType != null) {
-        // contentType = mimeType.split('/');
-        // }
-        }
-        // httpRequest.response.headers.contentType =
-        // ContentType(contentType[0], contentType[1], charset: 'utf-8');
-        httpRequest.response.add(body);
-        httpRequest.response.close();
-
-      });
-    });
-  }
+  // Future<void> _serverBind() async {
+  //   HttpServer.bind(InternetAddress.anyIPv4, 8000).then((server) {
+  //     print("00000");
+  //     server.listen((HttpRequest httpRequest) async {
+  //       // print("11111111");
+  //       // request.response.write('Hello, world! 23456');
+  //       // request.response.close();
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () {
           // copyDemoToSandBox();
           _controller?.loadUrl("http://127.0.0.1:8000/index.html");
-
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
@@ -178,6 +148,5 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // _controller?.loadUrl(Uri.file(file.path).toString());
     // _controller?.loadFile(file.path);
-
   }
 }

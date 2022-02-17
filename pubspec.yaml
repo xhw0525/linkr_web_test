@@ -36,7 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   path_provider: ^2.0.9
   webview_flutter: ^3.0.0
-  jaguar_flutter_asset: ^3.0.0
+#  jaguar_flutter_asset: ^3.0.0
+  jaguar: ^3.0.6
 
 dev_dependencies:
   flutter_test:

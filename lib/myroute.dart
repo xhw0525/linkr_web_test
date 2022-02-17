@@ -1,4 +1,5 @@
-import 'package:flutter/services.dart';
+import 'dart:io';
+
 import 'package:jaguar/jaguar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -23,9 +24,10 @@ Route serveFlutterAssets1(
 
     String lookupPath =
         segs.join('/') + (ctx.path.endsWith('/') ? 'index.html' : '');
-    final body = (await rootBundle.load('assets/$prefix$lookupPath'))
-        .buffer
-        .asUint8List();
+    final localPath = await _localPath;
+    File file = File('$localPath/$prefix$lookupPath');
+
+    final body = await file.readAsBytes();
 
     String? mimeType;
     if (!ctx.path.endsWith('/')) {

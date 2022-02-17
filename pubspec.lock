@@ -110,7 +110,7 @@ packages:
     source: hosted
     version: "1.0.0"
   jaguar:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: jaguar
       url: "https://pub.flutter-io.cn"
@@ -120,13 +120,6 @@ packages:
     dependency: transitive
     description:
       name: jaguar_common
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.0.0"
-  jaguar_flutter_asset:
-    dependency: "direct main"
-    description:
-      name: jaguar_flutter_asset
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.0"
